@@ -1,0 +1,64 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  # Predvolený box (tvoja preferencia)
+  config.vm.box = "generic/ubuntu2204"
+
+  # Spoločné nastavenia pre všetky VM
+  config.vm.provider "virtualbox" do |vb|
+    vb.gui = false
+  end
+
+  # Definície uzlov s public aj private IP
+  nodes = [
+    {
+      name: "k3s-master", hostname: "k3s-master",
+      public_ip:  "192.168.0.101",
+      private_ip: "192.168.230.10",
+      mem: 3072, cpus: 2
+    },
+    {
+      name: "k3s-worker-1", hostname: "k3s-worker-1",
+      public_ip:  "192.168.0.102",
+      private_ip: "192.168.230.11",
+      mem: 2048, cpus: 2
+    },
+    {
+      name: "k3s-worker-2", hostname: "k3s-worker-2",
+      public_ip:  "192.168.0.103",
+      private_ip: "192.168.230.12",
+      mem: 2048, cpus: 2
+    },
+  ]
+
+  nodes.each do |n|
+    config.vm.define n[:name] do |node|
+      node.vm.hostname = n[:hostname]
+
+      # BRIDGED (public_network) so statickou IP na 192.168.0.0/24
+      node.vm.network "public_network",
+        bridge:  "Intel(R) Ethernet Connection (17) I219-LM",
+        ip:      n[:public_ip],
+        netmask: "255.255.255.0",
+        gateway: "192.168.0.1"
+
+      # HOST-ONLY (private_network) so statickou IP
+      node.vm.network "private_network",
+        type: "static",
+        ip:   n[:private_ip],
+        name: "VirtualBox Host-Only Ethernet Adapter #2"
+
+      node.vm.provider "virtualbox" do |vb|
+        vb.name   = n[:name]
+        vb.memory = n[:mem]
+        vb.cpus   = n[:cpus]
+        vb.customize ["modifyvm", :id, "--paravirtprovider", "kvm"]
+        vb.customize ["modifyvm", :id, "--ioapic", "on"]
+      end
+
+      # Voliteľne: vypnúť zdieľaný priečinok
+      # node.vm.synced_folder ".", "/vagrant", disabled: true
+    end
+  end
+end
