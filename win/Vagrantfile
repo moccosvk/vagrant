@@ -1,1 +1,31 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
 
+
+Vagrant.configure("2") do |config|
+
+  config.vm.define "UbuntuVM" do |subconfig|
+    #subconfig.vm.box = "ubuntu/focal64" # Ubuntu 20.04
+    subconfig.vm.box = "cloud-image/ubuntu-24.04"
+    subconfig.vm.hostname = "VagrantGuest1"
+
+    # Bridged sieť
+    subconfig.vm.network "public_network",
+      type: "bridged",
+      bridge: "Intel(R) Ethernet Connection (17) I219-LM"
+
+    # Host-Only sieť
+    subconfig.vm.network "private_network",
+      type: "static",
+      ip: "192.168.230.10",
+      name: "VirtualBox Host-Only Ethernet Adapter #2"
+
+    # VirtualBox nastavenia
+    subconfig.vm.provider "virtualbox" do |vb|
+      vb.name = "VagrantVM"
+      vb.memory = 2048
+      vb.cpus = 2
+      vb.gui = false
+    end
+  end
+end
