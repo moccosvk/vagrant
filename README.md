@@ -34,8 +34,8 @@ hostonly    = "VirtualBox Host-Only Ethernet Adapter #2"           # from VBox
 Quick start
 
 # 1) Clone
-git clone https://github.com/<your-org>/<your-repo>.git
-cd <your-repo>
+git clone https://github.com/moccosvk/vagrant.git
+cd <your-dir>/<win or lin>
 
 # 2) Bring up the lab
 vagrant up
